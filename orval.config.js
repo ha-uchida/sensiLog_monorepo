@@ -1,19 +1,19 @@
+import dotenv from 'dotenv';
+dotenv.config();
+
 module.exports = {
   'sensilog-api': {
     input: {
-      target: 'http://localhost:3001/api-docs/openapi.json',
+      target: `${process.env.NEXT_PUBLIC_API_URL}/docs/json`,
     },
     output: {
       mode: 'tags-split',
-      target: './packages/api-client/src/api.ts',
+      target: './packages/api-client/src/api',
       schemas: './packages/api-client/src/schemas',
       client: 'react-query',
       mock: false,
       prettier: true,
       override: {
-        mutator: {
-          path: './packages/api-client/src/mutator.ts',
-        },
         operations: {
           // 設定記録一覧の無限スクロール対応
           getSettingsRecords: {

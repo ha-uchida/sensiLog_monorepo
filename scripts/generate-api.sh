@@ -14,18 +14,12 @@ fi
 
 # 既存の生成ファイルをクリーンアップ
 echo "🧹 Cleaning up existing generated files..."
-rm -rf ./packages/api-client/src/api.ts
+# rm -rf ./packages/api-client/src/api.ts
 rm -rf ./packages/api-client/src/schemas/
 
 # API client生成
 echo "⚙️  Generating API client..."
 pnpm orval --config ./orval.config.js
-
-# 生成されたファイルの存在確認
-if [ ! -f "./packages/api-client/src/api.ts" ]; then
-  echo "❌ API client generation failed"
-  exit 1
-fi
 
 # 生成されたファイルのフォーマット
 echo "💅 Formatting generated files..."
@@ -49,7 +43,7 @@ cd ../..
 
 # 生成されたファイルの統計表示
 echo "📊 Generation statistics:"
-echo "  - API functions: $(grep -c "export const use" ./packages/api-client/src/api.ts || echo "0")"
+echo "  - API functions: $(grep -c "export const use" ./packages/api-client/src/api/*/*.ts || echo "0")"
 echo "  - Schema files: $(find ./packages/api-client/src/schemas -name "*.ts" | wc -l || echo "0")"
 
 echo "🎉 API client generation completed successfully!"
