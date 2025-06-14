@@ -1,0 +1,918 @@
+openapi: 3.0.3
+info:
+  title: SensiLog API
+  version: 1.0.0
+  description: VALORANT感度・設定管理API
+  contact:
+    name: SensiLog Team
+    url: https://sensilog.com
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
+servers:
+  - url: https://api.sensilog.com
+    description: Production
+  - url: http://localhost:3001
+    description: Development
+
+tags:
+  - name: Authentication
+    description: 認証関連
+  - name: Settings
+    description: 設定記録管理
+  - name: MatchData
+    description: 試合データ
+  - name: Analytics
+    description: 分析・統計
+  - name: Admin
+    description: 管理者機能
+
+paths:
+  /health:
+    get:
+      summary: ヘルスチェック
+      tags: [System]
+      responses:
+        200:
+          description: サーバー稼働中
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: ok
+                  timestamp:
+                    type: string
+                    format: date-time
+
+  /auth/riot/login:
+    get:
+      summary: Riot OAuth認証開始
+      tags: [Authentication]
+      responses:
+        200:
+          description: 認証URL
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  authUrl:
+                    type: string
+                    format: uri
+                    description: Riot認証ページURL
+                  state:
+                    type: string
+                    description: CSRF保護用state
+
+  /auth/riot/callback:
+    post:
+      summary: Riot OAuth認証コールバック
+      tags: [Authentication]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                code:
+                  type: string
+                  description: 認証コード
+                state:
+                  type: string
+                  description: CSRF保護用state
+              required:
+                - code
+      responses:
+        200:
+          description: 認証成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user:
+                    $ref: '#/components/schemas/User'
+                  token:
+                    type: string
+                    description: JWTアクセストークン
+                  expiresAt:
+                    type: string
+                    format: date-time
+        400:
+          $ref: '#/components/responses/BadRequest'
+        401:
+          $ref: '#/components/responses/Unauthorized'
+
+  /auth/refresh:
+    post:
+      summary: トークンリフレッシュ
+      tags: [Authentication]
+      security:
+        - bearerAuth: []
+      responses:
+        200:
+          description: 新しいトークン
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+                  expiresAt:
+                    type: string
+                    format: date-time
+        401:
+          $ref: '#/components/responses/Unauthorized'
+
+  /auth/me:
+    get:
+      summary: ユーザー情報取得
+      tags: [Authentication]
+      security:
+        - bearerAuth: []
+      responses:
+        200:
+          description: ユーザー情報
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        401:
+          $ref: '#/components/responses/Unauthorized'
+
+  /settings/records:
+    get:
+      summary: 設定記録一覧取得
+      tags: [Settings]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+            minimum: 1
+            maximum: 100
+          description: 取得件数
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            default: 0
+            minimum: 0
+          description: オフセット
+        - name: tags
+          in: query
+          schema:
+            type: array
+            items:
+              type: string
+          description: タグフィルター
+        - name: startDate
+          in: query
+          schema:
+            type: string
+            format: date
+          description: 開始日
+        - name: endDate
+          in: query
+          schema:
+            type: string
+            format: date
+          description: 終了日
+      responses:
+        200:
+          description: 設定記録一覧
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  records:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/SettingsRecord'
+                  total:
+                    type: integer
+                    description: 総件数
+                  hasMore:
+                    type: boolean
+                    description: 次ページ有無
+        401:
+          $ref: '#/components/responses/Unauthorized'
+
+    post:
+      summary: 設定記録作成
+      tags: [Settings]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateSettingsRecord'
+      responses:
+        201:
+          description: 作成された設定記録
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SettingsRecord'
+        400:
+          $ref: '#/components/responses/BadRequest'
+        401:
+          $ref: '#/components/responses/Unauthorized'
+
+  /settings/records/{id}:
+    get:
+      summary: 設定記録詳細取得
+      tags: [Settings]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        200:
+          description: 設定記録詳細
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SettingsRecord'
+        404:
+          $ref: '#/components/responses/NotFound'
+        401:
+          $ref: '#/components/responses/Unauthorized'
+
+    put:
+      summary: 設定記録更新
+      tags: [Settings]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateSettingsRecord'
+      responses:
+        200:
+          description: 更新された設定記録
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SettingsRecord'
+        400:
+          $ref: '#/components/responses/BadRequest'
+        404:
+          $ref: '#/components/responses/NotFound'
+        401:
+          $ref: '#/components/responses/Unauthorized'
+
+    delete:
+      summary: 設定記録削除
+      tags: [Settings]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        204:
+          description: 削除成功
+        404:
+          $ref: '#/components/responses/NotFound'
+        401:
+          $ref: '#/components/responses/Unauthorized'
+
+  /settings/suggestions:
+    get:
+      summary: 設定入力サジェスト取得
+      tags: [Settings]
+      security:
+        - bearerAuth: []
+      responses:
+        200:
+          description: サジェスト一覧
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  mice:
+                    type: array
+                    items:
+                      type: string
+                    description: マウスデバイス一覧
+                  keyboards:
+                    type: array
+                    items:
+                      type: string
+                    description: キーボード一覧
+                  mousepads:
+                    type: array
+                    items:
+                      type: string
+                    description: マウスパッド一覧
+                  tags:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Tag'
+
+  /match-data:
+    get:
+      summary: 試合データ取得
+      tags: [MatchData]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: startDate
+          in: query
+          schema:
+            type: string
+            format: date
+          description: 開始日
+        - name: endDate
+          in: query
+          schema:
+            type: string
+            format: date
+          description: 終了日
+        - name: maps
+          in: query
+          schema:
+            type: array
+            items:
+              type: string
+          description: マップフィルター
+        - name: agents
+          in: query
+          schema:
+            type: array
+            items:
+              type: string
+          description: エージェントフィルター
+        - name: gameMode
+          in: query
+          schema:
+            type: string
+          description: ゲームモード
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 50
+            minimum: 1
+            maximum: 200
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            default: 0
+            minimum: 0
+      responses:
+        200:
+          description: 試合データ一覧
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  matches:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/MatchData'
+                  total:
+                    type: integer
+                  hasMore:
+                    type: boolean
+        401:
+          $ref: '#/components/responses/Unauthorized'
+
+  /match-data/sync:
+    post:
+      summary: 試合データ手動同期
+      tags: [MatchData]
+      security:
+        - bearerAuth: []
+      responses:
+        202:
+          description: 同期開始
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "同期を開始しました"
+                  jobId:
+                    type: string
+        401:
+          $ref: '#/components/responses/Unauthorized'
+        429:
+          description: レート制限
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /analytics/performance:
+    get:
+      summary: パフォーマンス分析データ取得
+      tags: [Analytics]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: metric
+          in: query
+          required: true
+          schema:
+            type: string
+            enum: [combatScore, headshotPercentage, kdRatio, adr]
+          description: 分析対象メトリクス
+        - name: startDate
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: endDate
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: groupBy
+          in: query
+          schema:
+            type: string
+            enum: [day, week, month]
+            default: day
+          description: グループ化単位
+      responses:
+        200:
+          description: パフォーマンス分析データ
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  dataPoints:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/AnalyticsDataPoint'
+                  summary:
+                    $ref: '#/components/schemas/PerformanceSummary'
+                  settingsChanges:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/SettingsChange'
+
+  /analytics/comparison:
+    post:
+      summary: 期間比較分析
+      tags: [Analytics]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                period1:
+                  $ref: '#/components/schemas/DateRange'
+                period2:
+                  $ref: '#/components/schemas/DateRange'
+                metrics:
+                  type: array
+                  items:
+                    type: string
+                    enum: [combatScore, headshotPercentage, kdRatio, adr]
+              required:
+                - period1
+                - period2
+                - metrics
+      responses:
+        200:
+          description: 比較分析結果
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ComparisonResult'
+
+components:
+  schemas:
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        email:
+          type: string
+          format: email
+        riotPuuid:
+          type: string
+          description: Riot PUUID
+        gameName:
+          type: string
+          description: Riot ID
+        tagLine:
+          type: string
+          description: Riot Tag
+        isAdmin:
+          type: boolean
+          default: false
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - email
+        - createdAt
+
+    SettingsRecord:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        userId:
+          type: string
+          format: uuid
+        sensitivity:
+          type: number
+          format: float
+          minimum: 0
+          maximum: 10
+          description: 感度
+        dpi:
+          type: integer
+          minimum: 100
+          maximum: 10000
+          description: DPI
+        mouseDevice:
+          type: string
+          maxLength: 100
+          description: マウスデバイス
+        keyboardDevice:
+          type: string
+          maxLength: 100
+          description: キーボードデバイス
+        mousepad:
+          type: string
+          maxLength: 100
+          description: マウスパッド
+        tags:
+          type: array
+          items:
+            type: string
+          description: タグ
+        comment:
+          type: string
+          maxLength: 500
+          description: コメント
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - userId
+        - sensitivity
+        - dpi
+        - createdAt
+
+    CreateSettingsRecord:
+      type: object
+      properties:
+        sensitivity:
+          type: number
+          format: float
+          minimum: 0
+          maximum: 10
+        dpi:
+          type: integer
+          minimum: 100
+          maximum: 10000
+        mouseDevice:
+          type: string
+          maxLength: 100
+        keyboardDevice:
+          type: string
+          maxLength: 100
+        mousepad:
+          type: string
+          maxLength: 100
+        tags:
+          type: array
+          items:
+            type: string
+        comment:
+          type: string
+          maxLength: 500
+      required:
+        - sensitivity
+        - dpi
+
+    UpdateSettingsRecord:
+      type: object
+      properties:
+        sensitivity:
+          type: number
+          format: float
+          minimum: 0
+          maximum: 10
+        dpi:
+          type: integer
+          minimum: 100
+          maximum: 10000
+        mouseDevice:
+          type: string
+          maxLength: 100
+        keyboardDevice:
+          type: string
+          maxLength: 100
+        mousepad:
+          type: string
+          maxLength: 100
+        tags:
+          type: array
+          items:
+            type: string
+        comment:
+          type: string
+          maxLength: 500
+
+    MatchData:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        userId:
+          type: string
+          format: uuid
+        matchId:
+          type: string
+          description: Riot Match ID
+        gameStartTime:
+          type: string
+          format: date-time
+        gameEndTime:
+          type: string
+          format: date-time
+        mapName:
+          type: string
+          description: マップ名
+        gameMode:
+          type: string
+          description: ゲームモード
+        agentName:
+          type: string
+          description: 使用エージェント
+        kills:
+          type: integer
+          minimum: 0
+        deaths:
+          type: integer
+          minimum: 0
+        assists:
+          type: integer
+          minimum: 0
+        combatScore:
+          type: number
+          format: float
+          minimum: 0
+          description: ACS（Average Combat Score）
+        headshotPercentage:
+          type: number
+          format: float
+          minimum: 0
+          maximum: 100
+          description: ヘッドショット率
+        kdRatio:
+          type: number
+          format: float
+          minimum: 0
+          description: K/D比
+        adr:
+          type: number
+          format: float
+          minimum: 0
+          description: 平均ダメージ/ラウンド
+        damageDealt:
+          type: integer
+          minimum: 0
+        roundsPlayed:
+          type: integer
+          minimum: 0
+        teamWon:
+          type: boolean
+        rankTier:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - userId
+        - matchId
+        - gameStartTime
+
+    Tag:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+          maxLength: 50
+        color:
+          type: string
+          pattern: '^#[0-9A-Fa-f]{6}$'
+          description: Hex色コード
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - name
+
+    AnalyticsDataPoint:
+      type: object
+      properties:
+        date:
+          type: string
+          format: date
+        value:
+          type: number
+          format: float
+        matchCount:
+          type: integer
+          description: 該当期間の試合数
+      required:
+        - date
+        - value
+
+    PerformanceSummary:
+      type: object
+      properties:
+        average:
+          type: number
+          format: float
+        best:
+          type: number
+          format: float
+        worst:
+          type: number
+          format: float
+        trend:
+          type: string
+          enum: [improving, declining, stable]
+        changePercent:
+          type: number
+          format: float
+          description: 変化率（%）
+
+    SettingsChange:
+      type: object
+      properties:
+        date:
+          type: string
+          format: date-time
+        changes:
+          type: array
+          items:
+            type: object
+            properties:
+              field:
+                type: string
+              oldValue:
+                type: string
+              newValue:
+                type: string
+
+    DateRange:
+      type: object
+      properties:
+        startDate:
+          type: string
+          format: date
+        endDate:
+          type: string
+          format: date
+      required:
+        - startDate
+        - endDate
+
+    ComparisonResult:
+      type: object
+      properties:
+        period1:
+          type: object
+          properties:
+            label:
+              type: string
+            stats:
+              $ref: '#/components/schemas/PerformanceSummary'
+        period2:
+          type: object
+          properties:
+            label:
+              type: string
+            stats:
+              $ref: '#/components/schemas/PerformanceSummary'
+        comparison:
+          type: object
+          additionalProperties:
+            type: object
+            properties:
+              difference:
+                type: number
+                format: float
+              percentChange:
+                type: number
+                format: float
+              trend:
+                type: string
+                enum: [up, down, same]
+
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+          description: エラーメッセージ
+        code:
+          type: string
+          description: エラーコード
+        details:
+          type: object
+          description: 詳細情報
+      required:
+        - error
+
+  responses:
+    BadRequest:
+      description: リクエストが不正
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+    Unauthorized:
+      description: 認証が必要
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+    Forbidden:
+      description: アクセス権限なし
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+    NotFound:
+      description: リソースが見つからない
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

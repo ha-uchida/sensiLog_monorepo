@@ -1,0 +1,84 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: sensilog-postgres
+    environment:
+      POSTGRES_DB: sensilog
+      POSTGRES_USER: sensilog
+      POSTGRES_PASSWORD: sensilog_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - sensilog-network
+
+  # Redis (for caching and sessions)
+  redis:
+    image: redis:7-alpine
+    container_name: sensilog-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - sensilog-network
+
+  # API Server
+  api:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+    container_name: sensilog-api
+    environment:
+      - DATABASE_URL=postgresql://sensilog:sensilog_password@postgres:5432/sensilog
+      - REDIS_URL=redis://redis:6379
+      - JWT_SECRET=development-jwt-secret-minimum-32-characters
+      - NODE_ENV=development
+      - LOG_LEVEL=info
+      - PORT=3001
+      - HOST=0.0.0.0
+    ports:
+      - "3001:3001"
+    depends_on:
+      - postgres
+      - redis
+    volumes:
+      - ./apps/api:/app
+      - /app/node_modules
+    networks:
+      - sensilog-network
+    command: pnpm dev
+
+  # Web Frontend
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+    container_name: sensilog-web
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:3001
+      - NEXT_PUBLIC_ENVIRONMENT=development
+    ports:
+      - "3000:3000"
+    depends_on:
+      - api
+    volumes:
+      - ./apps/web:/app
+      - /app/node_modules
+      - /app/.next
+    networks:
+      - sensilog-network
+    command: pnpm dev
+
+volumes:
+  postgres_data:
+  redis_data:
+
+networks:
+  sensilog-network:
+    driver: bridge

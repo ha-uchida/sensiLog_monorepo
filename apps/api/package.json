@@ -1,0 +1,38 @@
+{
+  "name": "@sensilog/api",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/server.ts",
+    "build": "tsc",
+    "start": "node dist/server.js",
+    "type-check": "tsc --noEmit",
+    "lint": "eslint src --ext .ts,.tsx",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "fastify": "^4.21.0",
+    "@fastify/swagger": "^8.8.0",
+    "@fastify/swagger-ui": "^1.9.3",
+    "@fastify/cors": "^8.3.0",
+    "@fastify/jwt": "^7.2.0",
+    "@fastify/type-provider-typebox": "^4.0.0",
+    "@sinclair/typebox": "^0.31.0",
+    "@sensilog/db": "workspace:*",
+    "fastify-plugin": "^4.5.0",
+    "drizzle-orm": "^0.36.0",
+    "zod": "^3.22.0",
+    "dotenv": "^16.3.1",
+    "axios": "^1.5.0",
+    "pino": "^9.1.0",
+    "pino-pretty": "^13.0.0"
+  },
+  "devDependencies": {
+    "tsx": "^3.12.7",
+    "typescript": "^5.1.6",
+    "@types/node": "^20.4.5",
+    "eslint": "^8.45.0",
+    "@typescript-eslint/eslint-plugin": "^6.2.0",
+    "@typescript-eslint/parser": "^6.2.0"
+  }
+}

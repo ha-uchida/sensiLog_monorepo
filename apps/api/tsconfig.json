@@ -1,0 +1,20 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "outDir": "dist",
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "node",
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "declaration": false,
+    "sourceMap": true,
+    "baseUrl": "../../",
+    "paths": {
+      "@sensilog/db": ["packages/db/src/index.ts"],
+      "@sensilog/db/*": ["packages/db/src/*"]
+    }
+  },
+  "include": ["src/**/*", "../../packages/db/src/**/*", "src/types/**/*"],
+  "exclude": ["dist", "node_modules"]
+}

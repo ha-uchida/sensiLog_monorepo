@@ -1,0 +1,33 @@
+{
+  "name": "sensilog-monorepo",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "build:web": "turbo run build --filter=web",
+    "build:api": "turbo run build --filter=api",
+    "start:api": "turbo run start --filter=api",
+    "generate:api": "./scripts/generate-api.sh",
+    "db:push": "cd packages/db && pnpm db:push",
+    "db:studio": "cd packages/db && pnpm db:studio",
+    "lint": "turbo run lint",
+    "type-check": "turbo run type-check",
+    "clean": "turbo run clean"
+  },
+  "devDependencies": {
+    "turbo": "^1.10.0",
+    "orval": "^6.24.0",
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0",
+    "prettier": "^3.0.0"
+  },
+  "packageManager": "pnpm@8.0.0",
+  "engines": {
+    "node": ">=20.0.0",
+    "pnpm": ">=8.0.0"
+  }
+}
