@@ -79,6 +79,12 @@ cp .env.example .env
 # .envファイルを編集
 ```
 
+### 3.5 開発用Dockerコンテナ起動
+```bash
+docker compose build
+docker compose up --filter postgres --filter redis -d
+```
+
 ### 4. データベースセットアップ
 ```bash
 pnpm db:push

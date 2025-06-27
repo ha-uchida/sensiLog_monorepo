@@ -1,20 +1,21 @@
 {
-  "extends": "../../tsconfig.json",
   "compilerOptions": {
-    "outDir": "dist",
-    "target": "ES2022",
-    "module": "ESNext",
-    "moduleResolution": "node",
+    "module": "commonjs",
+    "declaration": true,
+    "removeComments": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
     "allowSyntheticDefaultImports": true,
-    "esModuleInterop": true,
-    "declaration": false,
+    "target": "ES2021",
     "sourceMap": true,
-    "baseUrl": "../../",
-    "paths": {
-      "@sensilog/db": ["packages/db/src/index.ts"],
-      "@sensilog/db/*": ["packages/db/src/*"]
-    }
-  },
-  "include": ["src/**/*", "../../packages/db/src/**/*", "src/types/**/*"],
-  "exclude": ["dist", "node_modules"]
+    "outDir": "./dist",
+    "baseUrl": "./",
+    "incremental": true,
+    "skipLibCheck": true,
+    "strictNullChecks": true,
+    "noImplicitAny": true,
+    "strictBindCallApply": true,
+    "forceConsistentCasingInFileNames": true,
+    "noFallthroughCasesInSwitch": true
+  }
 }

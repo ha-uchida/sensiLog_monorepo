@@ -1,0 +1,137 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id              String   @id @default(uuid())
+  email           String   @unique
+  riotId          String   @unique
+  gameName        String
+  tagLine         String
+  riotPuuid       String?  @unique
+  isAdmin         Boolean  @default(false)
+  accessToken     String?  @db.Text
+  refreshToken    String?  @db.Text
+  tokenExpiresAt  DateTime?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  settingsRecords SettingsRecord[]
+  matchData       MatchData[]
+  teamMembers     TeamMember[]
+  adminActions    AdminAction[]
+
+  @@map("users")
+}
+
+model SettingsRecord {
+  id                    String    @id @default(uuid())
+  userId                String
+  sensitivity           Float
+  dpi                   Int
+  scopedSensitivity     Float?
+  windowsSensitivity    Int?      @default(6)
+  windowsAcceleration   Boolean?  @default(false)
+  mouseDevice           String?   @db.VarChar(100)
+  mousepad              String?   @db.VarChar(100)
+  keyboardDevice        String?   @db.VarChar(100)
+  screenResolution      String?   @db.VarChar(20)
+  aspectRatio           String?   @db.VarChar(10)
+  displayScaling        String?   @db.VarChar(10)
+  displayMode           String?   @db.VarChar(20)
+  rawInputBuffer        Boolean?  @default(true)
+  innerDeadzone         Float?    @default(0.0)
+  outerDeadzone         Float?    @default(1.0)
+  comment               String?   @db.Text
+  tags                  Json?     @default("[]")
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+  user                  User      @relation(fields: [userId], references: [id])
+
+  @@map("settingsRecords")
+}
+
+model MatchData {
+  id                    String    @id @default(uuid())
+  userId                String
+  matchId               String    @db.VarChar(50)
+  gameStartTime         DateTime
+  gameEndTime           DateTime
+  mapName               String    @db.VarChar(50)
+  gameMode              String    @db.VarChar(50)
+  rankTier              String?   @db.VarChar(50)
+  rr                    Int?
+  agentName             String    @db.VarChar(50)
+  kills                 Int
+  deaths                Int
+  assists               Int
+  combatScore           Decimal   @db.Decimal(10, 2)
+  damageDealt           Int
+  headshotCount         Int
+  bodyshotCount         Int
+  legshotCount          Int
+  headshotPercentage    Decimal?  @db.Decimal(5, 2)
+  kdRatio               Decimal?  @db.Decimal(5, 2)
+  adr                   Decimal?  @db.Decimal(10, 2)
+  roundsPlayed          Int
+  teamWon               Boolean
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+  user                  User      @relation(fields: [userId], references: [id])
+
+  @@unique([userId, matchId])
+  @@map("matchData")
+}
+
+model Tag {
+  id        Int       @id @default(autoincrement())
+  name      String    @unique @db.VarChar(50)
+  color     String?   @db.VarChar(7)
+  createdAt DateTime  @default(now())
+
+  @@map("tags")
+}
+
+model Team {
+  id          Int          @id @default(autoincrement())
+  name        String       @unique @db.VarChar(100)
+  description String?      @db.Text
+  createdAt   DateTime     @default(now())
+  members     TeamMember[]
+
+  @@map("teams")
+}
+
+model TeamMember {
+  teamId    Int
+  userId    String
+  role      String   @default("member") @db.VarChar(50)
+  joinedAt  DateTime @default(now())
+  team      Team     @relation(fields: [teamId], references: [id])
+  user      User     @relation(fields: [userId], references: [id])
+
+  @@id([teamId, userId])
+  @@map("teamMembers")
+}
+
+model AdminAction {
+  id             String   @id @default(uuid())
+  adminUserId    String
+  actionType     String   @db.VarChar(50)
+  targetUserId   String?
+  resourceType   String?  @db.VarChar(50)
+  resourceId     String?
+  details        Json?
+  createdAt      DateTime @default(now())
+  admin          User     @relation(fields: [adminUserId], references: [id])
+
+  @@map("adminActions")
+}

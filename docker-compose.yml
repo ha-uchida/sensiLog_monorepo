@@ -39,11 +39,10 @@ services:
       - REDIS_URL=redis://redis:6379
       - JWT_SECRET=development-jwt-secret-minimum-32-characters
       - NODE_ENV=development
-      - LOG_LEVEL=info
-      - PORT=3002
-      - HOST=0.0.0.0
+      - PORT=3001
+      - CORS_ORIGINS=http://localhost:3000,http://localhost:3002
     ports:
-      - "3002:3002"
+      - "3001:3001"
     depends_on:
       - postgres
       - redis
@@ -61,7 +60,7 @@ services:
       dockerfile: apps/web/Dockerfile
     container_name: sensilog-web
     environment:
-      - NEXT_PUBLIC_API_URL=http://localhost:3002
+      - NEXT_PUBLIC_API_URL=http://localhost:3001
       - NEXT_PUBLIC_ENVIRONMENT=development
     ports:
       - "3000:3000"

@@ -1,56 +1,47 @@
-FROM node:20-alpine AS base
+# Build stage
+FROM node:20-alpine AS builder
 
-# pnpmをインストール
-RUN npm install -g pnpm
-
-WORKDIR /app
-
-# 依存関係のコピーとインストール
-COPY package.json pnpm-lock.yaml ./
-COPY pnpm-workspace.yaml ./
-COPY apps/api/package.json ./apps/api/
-COPY packages/db/package.json ./packages/db/
-
-# 依存関係をインストール
-RUN pnpm install --force
-
-# ソースコードをコピー
-COPY . .
-
-# 開発用ステージ
-FROM base AS development
-EXPOSE 3002
-CMD ["pnpm", "--filter", "@sensilog/api", "dev"]
-
-# ビルド用ステージ
-FROM base AS builder
-RUN pnpm --filter "@sensilog/api" build
-
-# 本番用ステージ
-FROM node:20-alpine AS production
-
-RUN npm install -g pnpm
+# Install pnpm
+RUN corepack enable && corepack prepare pnpm@latest --activate
 
 WORKDIR /app
 
-# 本番用依存関係のみインストール
-COPY package.json pnpm-lock.yaml ./
-COPY pnpm-workspace.yaml ./
-COPY apps/api/package.json ./apps/api/
-COPY packages/db/package.json ./packages/db/
+# Copy root package files
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+COPY turbo.json ./
 
-RUN pnpm install --force
+# Copy app and packages
+COPY apps/api ./apps/api
+COPY packages ./packages
 
-# ビルド成果物をコピー
-COPY --from=builder /app/apps/api/dist ./apps/api/dist
-COPY --from=builder /app/packages/db ./packages/db
+# Install dependencies
+RUN pnpm install --frozen-lockfile
 
-# 非rootユーザーを作成
-RUN addgroup -g 1001 -S nodejs
-RUN adduser -S nextjs -u 1001
+# Generate Prisma client
+WORKDIR /app/apps/api
+RUN pnpm prisma generate
 
-USER nextjs
+# Build the application
+RUN pnpm build
 
-EXPOSE 3002
+# Production stage
+FROM node:20-alpine
 
-CMD ["node", "apps/api/dist/server.js"]
+# Install pnpm
+RUN corepack enable && corepack prepare pnpm@latest --activate
+
+WORKDIR /app
+
+# Copy built application
+COPY --from=builder /app/apps/api/dist ./dist
+COPY --from=builder /app/apps/api/package.json ./
+COPY --from=builder /app/apps/api/prisma ./prisma
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/apps/api/node_modules ./node_modules
+
+# Generate Prisma client in production
+RUN pnpm prisma generate
+
+EXPOSE 3001
+
+CMD ["node", "dist/main"]
