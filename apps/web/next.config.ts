@@ -3,7 +3,6 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   /* config options here */
   output: 'export',
-  transpilePackages: ["@sensilog/api-client"],
   
   // 環境変数設定
   env: {
@@ -25,28 +24,6 @@ const nextConfig: NextConfig = {
     ],
   },
 
-  // セキュリティヘッダー
-  async headers() {
-    return [
-      {
-        source: '/(.*)',
-        headers: [
-          {
-            key: 'X-Frame-Options',
-            value: 'DENY',
-          },
-          {
-            key: 'X-Content-Type-Options',
-            value: 'nosniff',
-          },
-          {
-            key: 'Referrer-Policy',
-            value: 'origin-when-cross-origin',
-          },
-        ],
-      },
-    ];
-  },
 
   // Experimental features
   experimental: {

@@ -29,7 +29,7 @@ const MOCK_USERS = [
 function MockAuthContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { login, isLoggingIn, loginError } = useAuth();
+  const { isLoggingIn, loginError } = useAuth();
   const [selectedUser, setSelectedUser] = useState<number | null>(null);
 
   const state = searchParams.get('state');
@@ -47,18 +47,18 @@ function MockAuthContent() {
 
     setSelectedUser(userIndex);
 
-    login(
-      { code: user.code, state },
-      {
-        onSuccess: () => {
-          router.push('/dashboard');
-        },
-        onError: (error) => {
-          console.error('Mock login failed:', error);
-          setSelectedUser(null);
-        },
-      },
-    );
+    // login(
+    //   { code: user.code, state },
+    //   {
+    //     onSuccess: () => {
+    //       router.push('/dashboard');
+    //     },
+    //     onError: (error) => {
+    //       console.error('Mock login failed:', error);
+    //       setSelectedUser(null);
+    //     },
+    //   },
+    // );
   };
 
   const handleCancel = () => {

@@ -1,12 +1,7 @@
 'use client';
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import {
-  apiUtils,
-  postAuthRiotCallback,
-  getAuthMe,
-  getAuthRiotLogin,
-} from '@sensilog/api-client';
+import { apiUtils } from '@/lib/api-client/mutator/custom-instance';
 import { useState, useEffect } from 'react';
 
 export interface AuthUser {
@@ -38,7 +33,9 @@ export function useAuth() {
         throw new Error('No auth token');
       }
 
-      return await getAuthMe();
+      // TODO: API clientが生成されたら復元
+      // return await getAuthMe();
+      throw new Error('API client not generated yet');
     },
     enabled: !!apiUtils.getAuthToken(),
     retry: false,
@@ -47,12 +44,14 @@ export function useAuth() {
 
   // ログイン処理
   const loginMutation = useMutation({
-    mutationFn: async (credentials: { code: string; state?: string }) => {
-      return await postAuthRiotCallback(credentials);
+    mutationFn: async () => {
+      // TODO: API clientが生成されたら復元
+      // return await postAuthRiotCallback(credentials);
+      throw new Error('API client not generated yet');
     },
-    onSuccess: (data) => {
+    onSuccess: (data: { user: AuthUser }) => {
       // ユーザー情報をキャッシュに設定
-      queryClient.setQueryData(['auth', 'me'], data.user);
+      queryClient.setQueryData(['auth', 'me'], data?.user);
       // 他のクエリを無効化
       queryClient.invalidateQueries({ queryKey: ['settings'] });
       queryClient.invalidateQueries({ queryKey: ['match-data'] });
@@ -73,7 +72,8 @@ export function useAuth() {
   // トークンリフレッシュ
   const refreshMutation = useMutation({
     mutationFn: async () => {
-      return await apiUtils.refreshToken();
+      // TODO: リフレッシュトークン実装
+      return false;
     },
     onSuccess: (success) => {
       if (success) {
@@ -98,7 +98,9 @@ export function useAuth() {
     authUrl: string;
     state: string;
   }> => {
-    return await getAuthRiotLogin();
+    // TODO: API clientが生成されたら復元
+    // return await getAuthRiotLogin();
+    throw new Error('API client not generated yet');
   };
 
   return {
