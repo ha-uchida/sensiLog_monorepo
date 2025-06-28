@@ -1,5 +1,6 @@
 import { type ClassValue, clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
+import { AxiosError } from 'axios';
 
 /**
  * Tailwind CSSクラスをマージするユーティリティ
@@ -165,16 +166,16 @@ export function formatGameMode(gameMode: string): string {
 /**
  * エラーメッセージを日本語に変換
  */
-export function formatErrorMessage(error: any): string {
+export function formatErrorMessage(error: unknown): string {
   if (typeof error === 'string') {
     return error;
   }
 
-  if (error?.response?.data?.error) {
-    return error.response.data.error;
+  if (error instanceof AxiosError && error.response?.data?.error) {
+    return error.response.data.error as string;
   }
 
-  if (error?.message) {
+  if (error instanceof Error && error.message) {
     return error.message;
   }
 
@@ -235,9 +236,9 @@ export function unique<T>(array: T[]): T[] {
 /**
  * オブジェクトから空の値を除去
  */
-export function removeEmptyValues<T extends Record<string, any>>(obj: T): Partial<T> {
+export function removeEmptyValues<T extends Record<string, unknown>>(obj: T): Partial<T> {
   return Object.fromEntries(
-    Object.entries(obj).filter(([_, value]) => 
+    Object.entries(obj).filter(([, value]) => 
       value !== null && value !== undefined && value !== ''
     )
   ) as Partial<T>;

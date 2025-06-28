@@ -12,7 +12,7 @@ import {
   Download,
   RefreshCw,
 } from "lucide-react"
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import { format } from "date-fns"
 
 // Mock data
@@ -61,7 +61,7 @@ export default function DashboardPage() {
           <div>
             <h1 className="text-3xl font-bold">Dashboard</h1>
             <p className="text-muted-foreground">
-              Welcome back! Here's your performance overview.
+              Welcome back! Here&apos;s your performance overview.
             </p>
           </div>
           <div className="flex items-center gap-4">

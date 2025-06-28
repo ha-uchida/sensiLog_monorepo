@@ -13,7 +13,6 @@ import { Badge } from "@/components/ui/badge"
 import {
   Save,
   History,
-  Settings as SettingsIcon,
   Monitor,
   Mouse,
   Keyboard,

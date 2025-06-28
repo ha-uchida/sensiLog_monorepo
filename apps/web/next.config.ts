@@ -2,7 +2,7 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   /* config options here */
-  transpilePackages: ["@sensilog/api-client"],
+  // transpilePackages: ["@sensilog/api-client"], // TODO: Enable when API client is ready
   
   // 環境変数設定
   env: {
