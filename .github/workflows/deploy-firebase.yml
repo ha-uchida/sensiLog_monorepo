@@ -44,7 +44,7 @@ jobs:
         with:
           repoToken: '${{ secrets.GITHUB_TOKEN }}'
           firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT }}'
-          projectId: sensilog-app
+          projectId: sensiLog
           channelId: 'pr-${{ github.event.pull_request.number }}'
         env:
           FIREBASE_CLI_EXPERIMENTS: webframeworks
@@ -55,7 +55,7 @@ jobs:
         with:
           repoToken: '${{ secrets.GITHUB_TOKEN }}'
           firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT }}'
-          projectId: sensilog-app
+          projectId: sensiLog
           channelId: live
         env:
           FIREBASE_CLI_EXPERIMENTS: webframeworks
@@ -67,7 +67,7 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             const channelId = `pr-${context.issue.number}`;
-            const previewUrl = `https://sensilog-app--${channelId}-random.web.app`;
+            const previewUrl = `https://sensiLog--${channelId}-random.web.app`;
             github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
