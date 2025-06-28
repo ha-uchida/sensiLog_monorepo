@@ -5,7 +5,7 @@ export * from "./api/riot/riot";
 export * from "./api/settings/settings";
 
 // スキーマ型エクスポート
-export * from "./schemas";
+// export * from "./schemas";
 
 // Mutator とユーティリティエクスポート
 export { customInstance, apiUtils } from "./mutator";

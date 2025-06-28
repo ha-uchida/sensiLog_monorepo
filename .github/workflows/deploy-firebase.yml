@@ -30,8 +30,6 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
-      - name: Build API client
-        run: pnpm build --filter=api-client
 
       - name: Build web app
         run: pnpm build --filter=web
