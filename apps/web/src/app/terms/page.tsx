@@ -30,6 +30,11 @@ export default function TermsPage() {
                   本利用規約（以下「本規約」）は、本サービスの利用条件を定めるものです。
                   本サービスを利用することにより、お客様は本規約に同意したものとみなされます。
                 </p>
+                <h4 className="text-lg font-semibold mt-4">運営者情報</h4>
+                <ul className="list-disc pl-6 space-y-1">
+                  <li>運営者：株式会社ESG</li>
+                  <li>所在地：東京都品川区</li>
+                </ul>
               </CardContent>
             </Card>
 
@@ -173,7 +178,7 @@ export default function TermsPage() {
                   本規約に関するご質問やご意見は、以下の連絡先までお願いいたします：
                 </p>
                 <p className="mt-4">
-                  <strong>Email:</strong> placeholder@example.com
+                  <strong>Email:</strong> sensilog_sup@e-sportsgg.com
                 </p>
               </CardContent>
             </Card>
@@ -190,6 +195,11 @@ export default function TermsPage() {
                   These Terms of Service (&quot;Terms&quot;) govern your use of the Service.
                   By using the Service, you agree to be bound by these Terms.
                 </p>
+                <h4 className="text-lg font-semibold mt-4">Operator Information</h4>
+                <ul className="list-disc pl-6 space-y-1">
+                  <li>Operator: ESG Inc.</li>
+                  <li>Location: Shinagawa-ku, Tokyo, Japan</li>
+                </ul>
               </CardContent>
             </Card>
 
@@ -326,7 +336,7 @@ export default function TermsPage() {
                   If you have any questions or concerns about these Terms, please contact us at:
                 </p>
                 <p className="mt-4">
-                  <strong>Email:</strong> placeholder@example.com
+                  <strong>Email:</strong> sensilog_sup@e-sportsgg.com
                 </p>
               </CardContent>
             </Card>

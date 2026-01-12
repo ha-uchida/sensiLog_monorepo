@@ -29,9 +29,17 @@ export default function PrivacyPage() {
                   SensiLog（以下「本サービス」）は、お客様のプライバシーを尊重し、個人情報の保護に努めています。
                   本プライバシーポリシーは、本サービスがどのような情報を収集し、どのように使用するかについて説明します。
                 </p>
-                <p>
+                <p className="mt-4">
+                  本サービスは、日本の個人情報保護法および関連する法令を遵守し、お客様の個人情報を適切に取り扱います。
+                </p>
+                <p className="mt-4">
                   本サービスを利用することにより、お客様は本プライバシーポリシーに同意したものとみなされます。
                 </p>
+                <h4 className="text-lg font-semibold mt-4">運営者情報</h4>
+                <ul className="list-disc pl-6 space-y-1">
+                  <li>運営者：株式会社ESG</li>
+                  <li>所在地：東京都品川区</li>
+                </ul>
               </CardContent>
             </Card>
 
@@ -186,7 +194,7 @@ export default function PrivacyPage() {
                   本プライバシーポリシーに関するご質問やご意見は、以下の連絡先までお願いいたします：
                 </p>
                 <p className="mt-4">
-                  <strong>Email:</strong> placeholder@example.com
+                  <strong>Email:</strong> sensilog_sup@e-sportsgg.com
                 </p>
               </CardContent>
             </Card>
@@ -202,9 +210,18 @@ export default function PrivacyPage() {
                   SensiLog (&quot;the Service&quot;) respects your privacy and is committed to protecting your personal information.
                   This Privacy Policy explains what information we collect and how we use it.
                 </p>
-                <p>
+                <p className="mt-4">
+                  This Service complies with Japan&apos;s Act on the Protection of Personal Information (APPI) and related laws,
+                  and handles your personal information appropriately.
+                </p>
+                <p className="mt-4">
                   By using the Service, you agree to the terms of this Privacy Policy.
                 </p>
+                <h4 className="text-lg font-semibold mt-4">Operator Information</h4>
+                <ul className="list-disc pl-6 space-y-1">
+                  <li>Operator: ESG Inc.</li>
+                  <li>Location: Shinagawa-ku, Tokyo, Japan</li>
+                </ul>
               </CardContent>
             </Card>
 
@@ -358,7 +375,7 @@ export default function PrivacyPage() {
                   If you have any questions or concerns about this Privacy Policy, please contact us at:
                 </p>
                 <p className="mt-4">
-                  <strong>Email:</strong> placeholder@example.com
+                  <strong>Email:</strong> sensilog_sup@e-sportsgg.com
                 </p>
               </CardContent>
             </Card>
